@@ -1,0 +1,42 @@
+<!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
+<idea-plugin>
+    <id>co.huggingface.llm-intellij</id>
+
+    <name>LLM</name>
+
+    <vendor email="support@huggingface.co" url="https://huggingface.co">HuggingFace</vendor>
+
+    <!-- Description of the plugin displayed on the Plugin Page and IDE Plugin Manager.
+         Simple HTML elements (text formatting, paragraphs, and lists) can be added inside of <![CDATA[ ]]> tag.
+         Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-description -->
+    <description><![CDATA[
+    <b>llm-intellij</b> is an extension for all things LLM. It uses <a href="https://github.com/huggingface/llm-ls">llm-ls</a> as its backend.
+    <h3>Features</h3>
+    <h4>Code completion</h4>
+    This plugin supports "ghost-text" code completion, à la Copilot.
+    <h4>Choose your model</h4>
+    Requests for code generation are made via an HTTP request.
+
+    You can use the Hugging Face Inference API or your own HTTP endpoint, provided it adheres to the API specified <a href="https://huggingface.co/docs/api-inference/detailed_parameters#text-generation-task">here</a> or <a href="https://huggingface.github.io/text-generation-inference/#/Text%20Generation%20Inference/generate">here</a>.
+
+    The list of officially supported models is located in the config template section.
+
+    <h4>Always fit within the context window</h4>
+    The prompt sent to the model will always be sized to fit within the context window, with the number of tokens determined using tokenizers.
+
+    <h4>Code attribution</h4>
+    Hit Cmd+shift+a to check if the generated code is in The Stack. This is a rapid first-pass attribution check using https://stack.dataportraits.org. We check for sequences of at least 50 characters that match a Bloom filter. This means false positives are possible and long enough surrounding context is necessary (see the paper for details on n-gram striding and sequence length). The dedicated Stack search tool is a full dataset index and can be used for a complete second pass.
+  ]]></description>
+
+    <depends>com.intellij.modules.platform</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+
+    </extensions>
+    <extensionPoints>
+        <extensionPoint
+                name="myExtensionPoint1"
+                beanClass="com.intellij.codeInsight.inline.completion.InlineCompletionProvider"/>
+    </extensionPoints>
+
+</idea-plugin>
