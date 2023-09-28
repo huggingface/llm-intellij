@@ -6,9 +6,6 @@
 
     <vendor email="support@huggingface.co" url="https://huggingface.co">HuggingFace</vendor>
 
-    <!-- Description of the plugin displayed on the Plugin Page and IDE Plugin Manager.
-         Simple HTML elements (text formatting, paragraphs, and lists) can be added inside of <![CDATA[ ]]> tag.
-         Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-description -->
     <description><![CDATA[
     <b>llm-intellij</b> is an extension for all things LLM. It uses <a href="https://github.com/huggingface/llm-ls">llm-ls</a> as its backend.
     <h3>Features</h3>
@@ -31,12 +28,8 @@
     <depends>com.intellij.modules.platform</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-
+        <inline.completion.provider implementation="co.huggingface.llmintellij.LlmLsCompletionProvider"></inline.completion.provider>w
+        <platform.lsp.serverSupportProvider implementation="co.huggingface.llmintellij.lsp.LlmLsServerSupportProvider"/>
+        <!-- <toolWindow factoryClass="com.github.bzz.intellij.toolWindow.LLMToolWindowFactory" id="LLM"/> -->
     </extensions>
-    <extensionPoints>
-        <extensionPoint
-                name="myExtensionPoint1"
-                beanClass="com.intellij.codeInsight.inline.completion.InlineCompletionProvider"/>
-    </extensionPoints>
-
 </idea-plugin>
