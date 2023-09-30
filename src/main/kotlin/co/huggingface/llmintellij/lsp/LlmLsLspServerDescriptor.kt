@@ -22,8 +22,7 @@ class LlmLsLspServerDescriptor(project: Project) : ProjectWideLspServerDescripto
         }
     }
 
-    override val lsp4jServerClass: Class<out LanguageServer>
-        get() = LlmLsLanguageServer::class.java
+    override val lsp4jServerClass: Class<out LanguageServer> = LlmLsLanguageServer::class.java
 
     override val lspGoToDefinitionSupport = false
 

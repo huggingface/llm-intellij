@@ -23,13 +23,20 @@
 
     <h4>Code attribution</h4>
     Hit Cmd+shift+a to check if the generated code is in The Stack. This is a rapid first-pass attribution check using https://stack.dataportraits.org. We check for sequences of at least 50 characters that match a Bloom filter. This means false positives are possible and long enough surrounding context is necessary (see the paper for details on n-gram striding and sequence length). The dedicated Stack search tool is a full dataset index and can be used for a complete second pass.
+
+    More info at <a href="https://github.com/huggingface/llm-intellij">llm-intellij</a>
   ]]></description>
 
     <depends>com.intellij.modules.platform</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <inline.completion.provider implementation="co.huggingface.llmintellij.LlmLsCompletionProvider"></inline.completion.provider>w
+        <inline.completion.provider implementation="co.huggingface.llmintellij.LlmLsCompletionProvider"></inline.completion.provider>
         <platform.lsp.serverSupportProvider implementation="co.huggingface.llmintellij.lsp.LlmLsServerSupportProvider"/>
-        <!-- <toolWindow factoryClass="com.github.bzz.intellij.toolWindow.LLMToolWindowFactory" id="LLM"/> -->
+        <applicationConfigurable
+                parentId="tools"
+                instance="co.huggingface.llmintellij.LlmSettingsConfigurable"
+                id="co.huggingface.llmintellij.LlmSettingsConfigurable"
+                displayName="LLM Settings"/>
+        <applicationService serviceImplementation="co.huggingface.llmintellij.LlmSettingsState"/>
     </extensions>
 </idea-plugin>
