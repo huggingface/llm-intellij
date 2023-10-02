@@ -4,7 +4,7 @@
 
     <name>LLM</name>
 
-    <vendor email="support@huggingface.co" url="https://huggingface.co">HuggingFace</vendor>
+    <vendor email="support@huggingface.co" url="https://huggingface.co">hugging-face</vendor>
 
     <description><![CDATA[
     <b>llm-intellij</b> is an extension for all things LLM. It uses <a href="https://github.com/huggingface/llm-ls">llm-ls</a> as its backend.
