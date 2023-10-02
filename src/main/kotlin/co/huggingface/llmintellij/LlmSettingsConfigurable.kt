@@ -39,6 +39,8 @@ class LlmSettingsConfigurable : Configurable {
         modified = modified or (settingsComponent?.getFimSuffix() != settings.fim.suffix)
         modified = modified or (settingsComponent?.isTlsSkipVerifyInsecureEnabled() != settings.tlsSkipVerifyInsecure)
         modified = modified or (settingsComponent?.getLspBinaryPath() != settings.lsp.binaryPath)
+        modified = modified or (settingsComponent?.getLspVersion() != settings.lsp.version)
+        modified = modified or (settingsComponent?.getLspLogLevel() != settings.lsp.logLevel)
         modified = modified or (settingsComponent?.getTokenizerConfig() != settings.tokenizer)
         modified = modified or (settingsComponent?.getContextWindow() != settings.contextWindow)
         return modified
@@ -59,6 +61,8 @@ class LlmSettingsConfigurable : Configurable {
         settings.fim.suffix = settingsComponent?.getFimSuffix() ?: ""
         settings.tlsSkipVerifyInsecure = settingsComponent?.isTlsSkipVerifyInsecureEnabled() ?: false
         settings.lsp.binaryPath = settingsComponent?.getLspBinaryPath()
+        settings.lsp.version = settingsComponent?.getLspVersion() ?: ""
+        settings.lsp.logLevel = settingsComponent?.getLspLogLevel() ?: ""
         settings.tokenizer = settingsComponent?.getTokenizerConfig()
         settings.contextWindow = settingsComponent?.getContextWindow() ?: 0u
     }
@@ -78,6 +82,8 @@ class LlmSettingsConfigurable : Configurable {
         settingsComponent?.setFimSuffix(settings.fim.suffix)
         settingsComponent?.setTlsSkipVerifyInsecureStatus(settings.tlsSkipVerifyInsecure)
         settingsComponent?.setLspBinaryPath(settings.lsp.binaryPath ?: "")
+        settingsComponent?.setLspVersion(settings.lsp.version)
+        settingsComponent?.setLspLogLevel(settings.lsp.logLevel)
         settingsComponent?.setTokenizerConfig(settings.tokenizer)
         settingsComponent?.setContextWindow(settings.contextWindow)
     }

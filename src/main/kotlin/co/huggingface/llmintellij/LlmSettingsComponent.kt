@@ -42,6 +42,10 @@ class LlmSettingsComponent {
     private val fimSuffix: JBTextField
     private val tlsSkipVerifyInsecure: JBCheckBox
     private val lspBinaryPath: TextFieldWithBrowseButton
+    private val lspVersionLabel: JBLabel
+    private val lspVersion: JBTextField
+    private val lspLogLevelLabel: JBLabel
+    private val lspLogLevel: JBTextField
     private val tokenizerConfig: JComboBox<String>
     private val tokenizerConfigLocalPathLabel: JBLabel
     private val tokenizerConfigLocalPath: TextFieldWithBrowseButton
@@ -205,29 +209,37 @@ class LlmSettingsComponent {
         val lspBinaryPathLabel = JBLabel("Binary path")
         llmLsSubsectionPanel.add(lspBinaryPathLabel)
         llmLsSubsectionPanel.add(lspBinaryPath)
+        lspVersionLabel = JBLabel("Version")
+        lspVersion = JBTextField("0.2.1")
+        llmLsSubsectionPanel.add(lspVersionLabel)
+        llmLsSubsectionPanel.add(lspVersion)
+        lspLogLevelLabel = JBLabel("Log level")
+        lspLogLevel = JBTextField("warn")
+        llmLsSubsectionPanel.add(lspLogLevelLabel)
+        llmLsSubsectionPanel.add(lspLogLevel)
 
     }
 
     val preferredFocusedComponent: JComponent
         get() = model
 
-    public fun isGhostTextEnabled(): Boolean {
+    fun isGhostTextEnabled(): Boolean {
         return enableGhostText.isSelected
     }
 
-    public fun setGhostTextStatus(enabled: Boolean) {
+    fun setGhostTextStatus(enabled: Boolean) {
         enableGhostText.setSelected(enabled)
     }
 
-    public fun getModelIdOrEndpoint(): String {
+    fun getModelIdOrEndpoint(): String {
         return model.text
     }
 
-    public fun setModelIdOrEndpoint(value: String) {
+    fun setModelIdOrEndpoint(value: String) {
         model.text = value
     }
 
-    public fun getTokensToClear(): List<String>? {
+    fun getTokensToClear(): List<String>? {
         val tokensStr = tokensToClear.text
         return if (tokensStr == "") {
             null
@@ -236,7 +248,7 @@ class LlmSettingsComponent {
         }
     }
 
-    public fun setTokensToClear(tokens: List<String>?) {
+    fun setTokensToClear(tokens: List<String>?) {
         if (tokens == null) {
             tokensToClear.text = null
         } else {
@@ -244,31 +256,31 @@ class LlmSettingsComponent {
         }
     }
 
-    public fun getMaxNewTokens(): UInt {
+    fun getMaxNewTokens(): UInt {
         return maxNewTokens.text.toUInt()
     }
 
-    public fun setMaxNewTokens(value: UInt) {
+    fun setMaxNewTokens(value: UInt) {
         maxNewTokens.text = value.toString()
     }
 
-    public fun getTemperature(): Float {
+    fun getTemperature(): Float {
         return temperature.text.toFloat()
     }
 
-    public fun setTemperature(value: Float) {
+    fun setTemperature(value: Float) {
         temperature.text = value.toString()
     }
 
-    public fun getTopP(): Float {
+    fun getTopP(): Float {
         return topP.text.toFloat()
     }
 
-    public fun setTopP(value: Float) {
+     fun setTopP(value: Float) {
         topP.text = value.toString()
     }
 
-    public fun getStopTokens(): List<String>? {
+     fun getStopTokens(): List<String>? {
         val stopTokensStr = stopTokens.text
         return if (stopTokensStr == "") {
             null
@@ -277,7 +289,7 @@ class LlmSettingsComponent {
         }
     }
 
-    public fun setStopTokens(tokens: List<String>?) {
+    fun setStopTokens(tokens: List<String>?) {
         if (tokens == null) {
             stopTokens.text = ""
         } else {
@@ -285,47 +297,63 @@ class LlmSettingsComponent {
         }
     }
 
-    public fun isFimEnabled(): Boolean {
+    fun isFimEnabled(): Boolean {
         return fim.isSelected
     }
 
-    public fun setFimStatus(enabled: Boolean) {
+    fun setFimStatus(enabled: Boolean) {
         fim.setSelected(enabled)
     }
 
-    public fun getFimPrefix(): String {
+    fun getFimPrefix(): String {
         return fimPrefix.text
     }
 
-    public fun setFimPrefix(value: String) {
+    fun setFimPrefix(value: String) {
         fimPrefix.text = value
     }
 
-    public fun getFimMiddle(): String {
+    fun getFimMiddle(): String {
         return fimMiddle.text
     }
 
-    public fun setFimMiddle(value: String) {
+    fun setFimMiddle(value: String) {
         fimMiddle.text = value
     }
 
-    public fun getFimSuffix(): String {
+    fun getFimSuffix(): String {
         return fimSuffix.text
     }
 
-    public fun setFimSuffix(value: String) {
+    fun setFimSuffix(value: String) {
         fimSuffix.text = value
     }
 
-    public fun isTlsSkipVerifyInsecureEnabled(): Boolean {
+    fun isTlsSkipVerifyInsecureEnabled(): Boolean {
         return tlsSkipVerifyInsecure.isSelected
     }
 
-    public fun setTlsSkipVerifyInsecureStatus(enabled: Boolean) {
+    fun setTlsSkipVerifyInsecureStatus(enabled: Boolean) {
         tlsSkipVerifyInsecure.setSelected(enabled)
     }
 
-    public fun getLspBinaryPath(): String? {
+    fun getLspVersion(): String {
+        return lspVersion.text
+    }
+
+    fun setLspVersion(value: String) {
+        lspVersion.text = value
+    }
+
+    fun getLspLogLevel(): String {
+        return lspLogLevel.text
+    }
+
+    fun setLspLogLevel(value: String) {
+        lspLogLevel.text = value
+    }
+
+    fun getLspBinaryPath(): String? {
         val binaryPath = lspBinaryPath.text
         return if (binaryPath == "") {
             null
@@ -334,11 +362,11 @@ class LlmSettingsComponent {
         }
     }
 
-    public fun setLspBinaryPath(value: String) {
+    fun setLspBinaryPath(value: String) {
         lspBinaryPath.text = value
     }
 
-    public fun getTokenizerConfig(): TokenizerConfig? {
+    fun getTokenizerConfig(): TokenizerConfig? {
         val type = tokenizerConfig.getItemAt(tokenizerConfig.selectedIndex)
         return when (type) {
             "Hugging Face" -> {
@@ -356,7 +384,7 @@ class LlmSettingsComponent {
         }
     }
 
-    public fun setTokenizerConfig(value: TokenizerConfig?) {
+    fun setTokenizerConfig(value: TokenizerConfig?) {
         when (value) {
             is TokenizerConfig.HuggingFace -> {
                 tokenizerConfig.selectedItem = "Hugging Face"
@@ -379,11 +407,11 @@ class LlmSettingsComponent {
         }
     }
 
-    public fun getContextWindow(): UInt {
+    fun getContextWindow(): UInt {
         return contextWindow.text.toUInt()
     }
 
-    public fun setContextWindow(value: UInt) {
+    fun setContextWindow(value: UInt) {
         contextWindow.text = value.toString()
     }
 

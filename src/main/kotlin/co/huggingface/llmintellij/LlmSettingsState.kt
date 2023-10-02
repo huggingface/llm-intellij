@@ -6,8 +6,11 @@ import com.intellij.openapi.components.State
 import com.intellij.openapi.components.Storage
 import com.intellij.util.xmlb.XmlSerializerUtil
 
+
 class LspSettings {
     var binaryPath: String? = null
+    var version: String = "0.2.1"
+    var logLevel: String = "warn"
 }
 
 class FimParams(

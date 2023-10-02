@@ -13,7 +13,6 @@ class LlmLsCompletionProvider: InlineCompletionProvider {
     private val logger = Logger.getInstance("inlineCompletion")
 
     override suspend fun getProposals(request: InlineCompletionRequest): List<InlineCompletionElement> {
-        logger.info("getProposals")
         val project = request.editor.project
         return if (project == null) {
             logger.error("could not find project")
