@@ -19,15 +19,17 @@ class LlmLsCompletionProvider: InlineCompletionProvider {
             logger.error("could not find project")
             emptyList()
         } else {
+            val settings = LlmSettingsState.instance
+            val secrets = SecretsService.instance
             val lspServer = LspServerManager.getInstance(project).getServersForProvider(LlmLsServerSupportProvider::class.java).firstOrNull() ?: return emptyList()
             val textDocument = lspServer.requestExecutor.getDocumentIdentifier(request.file.virtualFile)
             val caretPosition = request.startOffset
             val line = request.document.getLineNumber(request.startOffset)
             val position = Position(line, caretPosition)
-            val queryParams = QueryParams(60u, 0.2f, true, 0.95f, listOf("<|endoftext|>"))
-            val fimParams = FimParams(true, "<fim_prefix>", "<fim_middle>", "<fim_suffix>")
-            val tokenizerConfig = TokenizerConfig.Local(path = "/Users/mc/.cache/llm_ls/bigcode/starcoder/tokenizer.json")
-            val params = CompletionParams(textDocument, position, request_params = queryParams, fim = fimParams, api_token = "hf_dummy", model = "http://localhost:4242", tokens_to_clear = listOf("<|endoftext|>"), tokenizer_config = tokenizerConfig, context_window = 8192u)
+            val queryParams = settings.queryParams
+            val fimParams = settings.fim
+            val tokenizerConfig = settings.tokenizer
+            val params = CompletionParams(textDocument, position, request_params = queryParams, fim = fimParams, api_token = secrets.getSecretSetting(), model = settings.model, tokens_to_clear = settings.tokensToClear, tokenizer_config = tokenizerConfig, context_window = settings.contextWindow)
             val completions = lspServer.requestExecutor.sendRequestSync(LlmLsGetCompletionsRequest(lspServer, params)) ?: return emptyList()
             completions.map { InlineCompletionElement(it.generated_text) }
         }

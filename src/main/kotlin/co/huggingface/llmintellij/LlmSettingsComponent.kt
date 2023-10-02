@@ -1,21 +1,26 @@
 package co.huggingface.llmintellij
 
+import com.intellij.openapi.fileChooser.FileChooserDescriptor
+import com.intellij.openapi.ui.TextFieldWithBrowseButton
 import com.intellij.ui.TitledSeparator
 import com.intellij.ui.components.JBCheckBox
 import com.intellij.ui.components.JBLabel
+import com.intellij.ui.components.JBPasswordField
 import com.intellij.ui.components.JBTextField
 import com.intellij.ui.components.panels.VerticalLayout
-import java.awt.Component
+import java.awt.FlowLayout
 import java.awt.event.ItemEvent
 import javax.swing.BoxLayout
 import javax.swing.JComboBox
 import javax.swing.JComponent
 import javax.swing.JPanel
+import javax.swing.event.DocumentEvent
+import javax.swing.event.DocumentListener
 
 class LlmSettingsComponent {
     val rootPanel: JPanel = JPanel()
     private val apiTokenLabel: JBLabel
-    private val apiToken: JBTextField
+    private val apiToken: JBPasswordField
     private val modelLabel: JBLabel
     private val model: JBTextField
     private val tokensToClearLabel: JBLabel
@@ -36,10 +41,10 @@ class LlmSettingsComponent {
     private val fimSuffixLabel: JBLabel
     private val fimSuffix: JBTextField
     private val tlsSkipVerifyInsecure: JBCheckBox
-    // private val lspBinaryPath = JBComboBox or something like that
+    private val lspBinaryPath: TextFieldWithBrowseButton
     private val tokenizerConfig: JComboBox<String>
     private val tokenizerConfigLocalPathLabel: JBLabel
-    private val tokenizerConfigLocalPath: JBTextField
+    private val tokenizerConfigLocalPath: TextFieldWithBrowseButton
     private val tokenizerConfigHuggingFaceRepositoryLabel: JBLabel
     private val tokenizerConfigHuggingFaceRepository: JBTextField
     private val tokenizerConfigDownloadUrlLabel: JBLabel
@@ -51,17 +56,36 @@ class LlmSettingsComponent {
     private val enableGhostText: JBCheckBox
 
     init {
+        // Used for all text fields with browse button
+        val descriptor = FileChooserDescriptor(true, false, false, false, false, false)
 
         rootPanel.layout = BoxLayout(rootPanel, BoxLayout.Y_AXIS)
 
+        val enableGhostTextPanel = JPanel(FlowLayout(FlowLayout.LEFT))
         enableGhostText = JBCheckBox("Enable ghost text", true)
-        enableGhostText.alignmentX = Component.LEFT_ALIGNMENT
-        rootPanel.add(enableGhostText)
+        enableGhostTextPanel.add(enableGhostText)
+        rootPanel.add(enableGhostTextPanel)
 
         val modelSectionPanel = createSectionPanel("Model", rootPanel)
 
         apiTokenLabel = JBLabel("API token")
-        apiToken = JBTextField()
+        apiToken = JBPasswordField()
+        apiToken.document.addDocumentListener(object : DocumentListener {
+            override fun insertUpdate(e: DocumentEvent) {
+                val apiTokenValue = String(apiToken.password)
+                SecretsService.instance.saveSecretSetting(apiTokenValue)
+            }
+
+            override fun removeUpdate(e: DocumentEvent) {
+                val apiTokenValue = String(apiToken.password)
+                SecretsService.instance.saveSecretSetting(apiTokenValue)
+            }
+
+            override fun changedUpdate(e: DocumentEvent) {
+                val apiTokenValue = String(apiToken.password)
+                SecretsService.instance.saveSecretSetting(apiTokenValue)
+            }
+        })
         modelSectionPanel.add(apiTokenLabel)
         modelSectionPanel.add(apiToken)
         modelLabel = JBLabel("Model or endpoint url")
@@ -77,7 +101,7 @@ class LlmSettingsComponent {
 
         val queryParamsSubsectionPanel = createSectionPanel("Query Params", modelSectionPanel)
         maxNewTokensLabel = JBLabel("Max new tokens")
-        maxNewTokens = JBTextField(60)
+        maxNewTokens = JBTextField("60")
         queryParamsSubsectionPanel.add(maxNewTokensLabel)
         queryParamsSubsectionPanel.add(maxNewTokens)
         temperatureLabel = JBLabel("Temperature")
@@ -95,7 +119,7 @@ class LlmSettingsComponent {
 
         val promptSectionPanel = createSectionPanel("Prompt", rootPanel)
         contextWindowLabel = JBLabel("Context window")
-        contextWindow = JBTextField(8192)
+        contextWindow = JBTextField("8192")
         promptSectionPanel.add(contextWindowLabel)
         promptSectionPanel.add(contextWindow)
 
@@ -117,31 +141,29 @@ class LlmSettingsComponent {
 
         fim.addItemListener { event ->
             if (event.stateChange == ItemEvent.SELECTED) {
-                fimPrefixLabel.isVisible = true
-                fimPrefix.isVisible = true
-                fimMiddleLabel.isVisible = true
-                fimMiddle.isVisible = true
-                fimSuffixLabel.isVisible = true
-                fimSuffix.isVisible = true
+                fimPrefixLabel.isEnabled = true
+                fimPrefix.isEnabled = true
+                fimMiddleLabel.isEnabled = true
+                fimMiddle.isEnabled = true
+                fimSuffixLabel.isEnabled = true
+                fimSuffix.isEnabled = true
             } else {
-                fimPrefix.text = ""
-                fimPrefixLabel.isVisible = false
-                fimPrefix.isVisible = false
-                fimMiddle.text = ""
-                fimMiddleLabel.isVisible = false
-                fimMiddle.isVisible = false
-                fimSuffix.text = ""
-                fimSuffixLabel.isVisible = false
-                fimSuffix.isVisible = false
+                fimPrefixLabel.isEnabled = false
+                fimPrefix.isEnabled = false
+                fimMiddleLabel.isEnabled = false
+                fimMiddle.isEnabled = false
+                fimSuffixLabel.isEnabled = false
+                fimSuffix.isEnabled = false
             }
         }
         val tokenizerSubsectionPanel = createSectionPanel("Tokenizer", promptSectionPanel)
-        val tokenizerOptions = arrayOf("Hugging Face", "Local", "Download")
+        val tokenizerOptions = arrayOf("Hugging Face", "Local", "Download", "None")
         tokenizerConfig = JComboBox(tokenizerOptions)
         tokenizerSubsectionPanel.add(tokenizerConfig)
 
         tokenizerConfigLocalPathLabel = JBLabel("Path")
-        tokenizerConfigLocalPath = JBTextField()
+        tokenizerConfigLocalPath = TextFieldWithBrowseButton()
+        tokenizerConfigLocalPath.addBrowseFolderListener("Select Path", null, null, descriptor)
         tokenizerConfigLocalPathLabel.isVisible = false
         tokenizerConfigLocalPath.isVisible = false
         tokenizerSubsectionPanel.add(tokenizerConfigLocalPathLabel)
@@ -177,36 +199,193 @@ class LlmSettingsComponent {
             tokenizerConfigDownloadTo.isVisible = selectedValue == "Download"
         }
 
-//        rootPanel = FormBuilder.createFormBuilder()
-//            .addLabeledComponent("API token: ", apiToken, 1, false)
-//            .addVerticalGap(1)
-//            .addLabeledComponent("Hugging Face model ID or endpoint URL: ", model, 1, false)
-//            .addVerticalGap(1)
-//            .addLabeledComponent("Comma separated list of tokens to remove from model's response: ", tokensToClear, 1, false)
-//            .addLabeledComponent("Max number of tokens to generate: ", maxNewTokens, 1, false)
-//            .addLabeledComponent("Temperature: ", temperature, 1, false)
-//            .addLabeledComponent("Top p: ", topP, 1, false)
-//            .addLabeledComponent("Comma separated list of stop tokens: ", stopTokens, 1, false)
-//            .addVerticalGap(1)
-//            .addComponent(fim, 1)
-//            .addLabeledComponent("FIM prefix: ", fimPrefix, 1, false)
-//            .addLabeledComponent("FIM middle: ", fimMiddle, 1, false)
-//            .addLabeledComponent("FIM suffix: ", fimSuffix, 1, false)
-//            .addLabeledComponent("TLS skip verify insecure: ", tlsSkipVerifyInsecure, 1, false)
-//            .addVerticalGap(1)
-//            .addLabeledComponent("Context window length: ", contextWindow, 1, false)
-//            .addVerticalGap(1)
-//            .addLabeledComponent("Enable ghost-text suggestions: ", enableGhostText, 1, false)
-//            .addVerticalGap(1)
-//            .addComponent(tokenizerConfigLocal)
-//            .addComponent(tokenizerConfigHuggingFace)
-//            .addComponent(tokenizerConfigDownload)
-//            .addComponentFillVertically(JPanel(), 0)
-//            .panel
+        val llmLsSubsectionPanel = createSectionPanel("llm-ls", rootPanel)
+        lspBinaryPath = TextFieldWithBrowseButton()
+        lspBinaryPath.addBrowseFolderListener("Select Path", null, null, descriptor)
+        val lspBinaryPathLabel = JBLabel("Binary path")
+        llmLsSubsectionPanel.add(lspBinaryPathLabel)
+        llmLsSubsectionPanel.add(lspBinaryPath)
+
     }
 
     val preferredFocusedComponent: JComponent
         get() = model
+
+    public fun isGhostTextEnabled(): Boolean {
+        return enableGhostText.isSelected
+    }
+
+    public fun setGhostTextStatus(enabled: Boolean) {
+        enableGhostText.setSelected(enabled)
+    }
+
+    public fun getModelIdOrEndpoint(): String {
+        return model.text
+    }
+
+    public fun setModelIdOrEndpoint(value: String) {
+        model.text = value
+    }
+
+    public fun getTokensToClear(): List<String>? {
+        val tokensStr = tokensToClear.text
+        return if (tokensStr == "") {
+            null
+        }else {
+            tokensStr.split(",")
+        }
+    }
+
+    public fun setTokensToClear(tokens: List<String>?) {
+        if (tokens == null) {
+            tokensToClear.text = null
+        } else {
+            tokensToClear.text = tokens.joinToString(",")
+        }
+    }
+
+    public fun getMaxNewTokens(): UInt {
+        return maxNewTokens.text.toUInt()
+    }
+
+    public fun setMaxNewTokens(value: UInt) {
+        maxNewTokens.text = value.toString()
+    }
+
+    public fun getTemperature(): Float {
+        return temperature.text.toFloat()
+    }
+
+    public fun setTemperature(value: Float) {
+        temperature.text = value.toString()
+    }
+
+    public fun getTopP(): Float {
+        return topP.text.toFloat()
+    }
+
+    public fun setTopP(value: Float) {
+        topP.text = value.toString()
+    }
+
+    public fun getStopTokens(): List<String>? {
+        val stopTokensStr = stopTokens.text
+        return if (stopTokensStr == "") {
+            null
+        } else {
+            stopTokensStr.split(",")
+        }
+    }
+
+    public fun setStopTokens(tokens: List<String>?) {
+        if (tokens == null) {
+            stopTokens.text = ""
+        } else {
+            stopTokens.text = tokens.joinToString(",")
+        }
+    }
+
+    public fun isFimEnabled(): Boolean {
+        return fim.isSelected
+    }
+
+    public fun setFimStatus(enabled: Boolean) {
+        fim.setSelected(enabled)
+    }
+
+    public fun getFimPrefix(): String {
+        return fimPrefix.text
+    }
+
+    public fun setFimPrefix(value: String) {
+        fimPrefix.text = value
+    }
+
+    public fun getFimMiddle(): String {
+        return fimMiddle.text
+    }
+
+    public fun setFimMiddle(value: String) {
+        fimMiddle.text = value
+    }
+
+    public fun getFimSuffix(): String {
+        return fimSuffix.text
+    }
+
+    public fun setFimSuffix(value: String) {
+        fimSuffix.text = value
+    }
+
+    public fun isTlsSkipVerifyInsecureEnabled(): Boolean {
+        return tlsSkipVerifyInsecure.isSelected
+    }
+
+    public fun setTlsSkipVerifyInsecureStatus(enabled: Boolean) {
+        tlsSkipVerifyInsecure.setSelected(enabled)
+    }
+
+    public fun getLspBinaryPath(): String? {
+        val binaryPath = lspBinaryPath.text
+        return if (binaryPath == "") {
+            null
+        } else {
+            binaryPath
+        }
+    }
+
+    public fun setLspBinaryPath(value: String) {
+        lspBinaryPath.text = value
+    }
+
+    public fun getTokenizerConfig(): TokenizerConfig? {
+        val type = tokenizerConfig.getItemAt(tokenizerConfig.selectedIndex)
+        return when (type) {
+            "Hugging Face" -> {
+                TokenizerConfig.HuggingFace(tokenizerConfigHuggingFaceRepository.text)
+            }
+            "Local" -> {
+                TokenizerConfig.Local(tokenizerConfigLocalPath.text)
+            }
+            "Download" -> {
+                TokenizerConfig.Download(tokenizerConfigDownloadUrl.text, tokenizerConfigDownloadTo.text)
+            }
+            else -> {
+                null
+            }
+        }
+    }
+
+    public fun setTokenizerConfig(value: TokenizerConfig?) {
+        when (value) {
+            is TokenizerConfig.HuggingFace -> {
+                tokenizerConfig.selectedItem = "Hugging Face"
+                tokenizerConfigHuggingFaceRepository.text = value.repository
+            }
+
+            is TokenizerConfig.Local -> {
+                tokenizerConfig.selectedItem = "Local"
+                tokenizerConfigLocalPath.text = value.path
+            }
+
+            is TokenizerConfig.Download -> {
+                tokenizerConfig.selectedItem = "Download"
+                tokenizerConfigDownloadUrl.text = value.url
+                tokenizerConfigDownloadTo.text = value.to
+            }
+            null -> {
+                tokenizerConfig.selectedItem = "None"
+            }
+        }
+    }
+
+    public fun getContextWindow(): UInt {
+        return contextWindow.text.toUInt()
+    }
+
+    public fun setContextWindow(value: UInt) {
+        contextWindow.text = value.toString()
+    }
 
     private fun createSectionPanel(title: String, parentPanel: JPanel): JPanel {
         val panel = JPanel()

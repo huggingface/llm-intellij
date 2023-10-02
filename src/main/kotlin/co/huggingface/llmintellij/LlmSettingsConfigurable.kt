@@ -26,21 +26,57 @@ class LlmSettingsConfigurable : Configurable {
 
     override fun isModified(): Boolean {
         val settings: LlmSettingsState = LlmSettingsState.instance
-//        var modified: Boolean = !settingsComponent?.userNameText.equalVjs(settings.userId)
-//        modified = modified or (settingsComponent?.ideaUserStatus !== settings.ideaStatus)
-        return false
+        var modified: Boolean = settingsComponent?.getModelIdOrEndpoint() != settings.model
+        modified = modified or (settingsComponent?.getTokensToClear() != settings.tokensToClear)
+        modified = modified or (settingsComponent?.getMaxNewTokens() != settings.queryParams.max_new_tokens)
+        modified = modified or (settingsComponent?.getTemperature() != settings.queryParams.temperature)
+        modified = modified or (settingsComponent?.getTopP() != settings.queryParams.top_p)
+        modified = modified or (settingsComponent?.getStopTokens() != settings.queryParams.stop_tokens)
+        modified = modified or (settingsComponent?.isFimEnabled() != settings.fim.enabled)
+        modified = modified or (settingsComponent?.getFimPrefix() != settings.fim.prefix)
+        modified = modified or (settingsComponent?.getFimMiddle() != settings.fim.middle)
+        modified = modified or (settingsComponent?.getFimSuffix() != settings.fim.suffix)
+        modified = modified or (settingsComponent?.isTlsSkipVerifyInsecureEnabled() != settings.tlsSkipVerifyInsecure)
+        modified = modified or (settingsComponent?.getLspBinaryPath() != settings.lsp.binaryPath)
+        modified = modified or (settingsComponent?.getTokenizerConfig() != settings.tokenizer)
+        modified = modified or (settingsComponent?.getContextWindow() != settings.contextWindow)
+        return modified
     }
 
     override fun apply() {
         val settings: LlmSettingsState = LlmSettingsState.instance
-//        settings.userId = settingsComponent?.userNameText ?: ""
-//        settings.ideaStatus = settingsComponent?.ideaUserStatus ?: false
+        settings.model = settingsComponent?.getModelIdOrEndpoint() ?: ""
+        settings.tokensToClear = settingsComponent?.getTokensToClear() ?: emptyList()
+        settings.queryParams.max_new_tokens = settingsComponent?.getMaxNewTokens() ?: 0u
+        settings.queryParams.temperature = settingsComponent?.getTemperature() ?: 0f
+        settings.queryParams.top_p = settingsComponent?.getTopP() ?: 0f
+        settings.queryParams.stop_tokens = settingsComponent?.getStopTokens()
+        settings.fim.enabled = settingsComponent?.isFimEnabled() ?: false
+        settings.fim.prefix = settingsComponent?.getFimPrefix() ?: ""
+        settings.fim.middle = settingsComponent?.getFimMiddle() ?: ""
+        settings.fim.suffix = settingsComponent?.getFimSuffix() ?: ""
+        settings.tlsSkipVerifyInsecure = settingsComponent?.isTlsSkipVerifyInsecureEnabled() ?: false
+        settings.lsp.binaryPath = settingsComponent?.getLspBinaryPath()
+        settings.tokenizer = settingsComponent?.getTokenizerConfig()
+        settings.contextWindow = settingsComponent?.getContextWindow() ?: 0u
     }
 
     override fun reset() {
         val settings: LlmSettingsState = LlmSettingsState.instance
-//        settingsComponent?.userNameText = settings.userId
-//        settingsComponent?.ideaUserStatus = settings.ideaStatus
+        settingsComponent?.setModelIdOrEndpoint(settings.model)
+        settingsComponent?.setTokensToClear(settings.tokensToClear)
+        settingsComponent?.setMaxNewTokens(settings.queryParams.max_new_tokens)
+        settingsComponent?.setTemperature(settings.queryParams.temperature)
+        settingsComponent?.setTopP(settings.queryParams.top_p)
+        settingsComponent?.setStopTokens(settings.queryParams.stop_tokens ?: emptyList())
+        settingsComponent?.setFimStatus(settings.fim.enabled)
+        settingsComponent?.setFimPrefix(settings.fim.prefix)
+        settingsComponent?.setFimMiddle(settings.fim.middle)
+        settingsComponent?.setFimSuffix(settings.fim.suffix)
+        settingsComponent?.setTlsSkipVerifyInsecureStatus(settings.tlsSkipVerifyInsecure)
+        settingsComponent?.setLspBinaryPath(settings.lsp.binaryPath ?: "")
+        settingsComponent?.setTokenizerConfig(settings.tokenizer)
+        settingsComponent?.setContextWindow(settings.contextWindow)
     }
 
     override fun disposeUIResources() {

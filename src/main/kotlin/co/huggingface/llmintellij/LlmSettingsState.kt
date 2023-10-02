@@ -11,18 +11,18 @@ class LspSettings {
 }
 
 class FimParams(
-    val enabled: Boolean = true,
-    val prefix: String = "<fim_prefix>",
-    val middle: String = "<fim_middle>",
-    val suffix: String = "<fim_suffix>",
+    var enabled: Boolean = true,
+    var prefix: String = "<fim_prefix>",
+    var middle: String = "<fim_middle>",
+    var suffix: String = "<fim_suffix>",
 )
 
 class QueryParams(
-    val max_new_tokens: UInt = 60u,
-    val temperature: Float = 0.2f,
-    val do_sample: Boolean = temperature > 0.2,
-    val top_p: Float = 0.95f,
-    val stop_tokens: List<String>? = null,
+    var max_new_tokens: UInt = 60u,
+    var temperature: Float = 0.2f,
+    var do_sample: Boolean = temperature > 0.2,
+    var top_p: Float = 0.95f,
+    var stop_tokens: List<String>? = null,
 )
 
 sealed class TokenizerConfig {
@@ -36,17 +36,16 @@ sealed class TokenizerConfig {
     storages = [Storage("LlmSettingsPlugin.xml")]
 )
 class LlmSettingsState: PersistentStateComponent<LlmSettingsState?> {
-    var api_token = null
-    var model: String = "bigcode/starcoderbase"
+    var model: String = "bigcode/starcoder"
     var tokensToClear: List<String> = listOf("<|endoftext|>")
     var queryParams = QueryParams()
     var fim = FimParams()
     var tlsSkipVerifyInsecure = false
     var lsp = LspSettings()
-    var tokenizer: TokenizerConfig? = null
-    var context_window = 8192
+    var tokenizer: TokenizerConfig? = TokenizerConfig.HuggingFace("bigcode/starcoder")
+    var contextWindow = 8192u
 
-    override fun getState(): LlmSettingsState? {
+    override fun getState(): LlmSettingsState {
         return this
     }
 
