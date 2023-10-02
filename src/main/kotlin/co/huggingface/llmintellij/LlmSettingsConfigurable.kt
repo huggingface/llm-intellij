@@ -26,7 +26,8 @@ class LlmSettingsConfigurable : Configurable {
 
     override fun isModified(): Boolean {
         val settings: LlmSettingsState = LlmSettingsState.instance
-        var modified: Boolean = settingsComponent?.getModelIdOrEndpoint() != settings.model
+        var modified: Boolean = settingsComponent?.isGhostTextEnabled() != settings.ghostTextEnabled
+        modified = modified or (settingsComponent?.getModelIdOrEndpoint() != settings.model)
         modified = modified or (settingsComponent?.getTokensToClear() != settings.tokensToClear)
         modified = modified or (settingsComponent?.getMaxNewTokens() != settings.queryParams.max_new_tokens)
         modified = modified or (settingsComponent?.getTemperature() != settings.queryParams.temperature)
@@ -45,6 +46,7 @@ class LlmSettingsConfigurable : Configurable {
 
     override fun apply() {
         val settings: LlmSettingsState = LlmSettingsState.instance
+        settings.ghostTextEnabled = settingsComponent?.isGhostTextEnabled() ?: false
         settings.model = settingsComponent?.getModelIdOrEndpoint() ?: ""
         settings.tokensToClear = settingsComponent?.getTokensToClear() ?: emptyList()
         settings.queryParams.max_new_tokens = settingsComponent?.getMaxNewTokens() ?: 0u
@@ -63,6 +65,7 @@ class LlmSettingsConfigurable : Configurable {
 
     override fun reset() {
         val settings: LlmSettingsState = LlmSettingsState.instance
+        settingsComponent?.setGhostTextStatus(settings.ghostTextEnabled)
         settingsComponent?.setModelIdOrEndpoint(settings.model)
         settingsComponent?.setTokensToClear(settings.tokensToClear)
         settingsComponent?.setMaxNewTokens(settings.queryParams.max_new_tokens)

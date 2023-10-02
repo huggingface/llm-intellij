@@ -36,6 +36,7 @@ sealed class TokenizerConfig {
     storages = [Storage("LlmSettingsPlugin.xml")]
 )
 class LlmSettingsState: PersistentStateComponent<LlmSettingsState?> {
+    var ghostTextEnabled = true
     var model: String = "bigcode/starcoder"
     var tokensToClear: List<String> = listOf("<|endoftext|>")
     var queryParams = QueryParams()
