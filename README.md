@@ -32,8 +32,8 @@ The prompt sent to the model will always be sized to fit within the context wind
 
 2. Define how the plugin will read your token. For this you have multiple options, in order of precedence:
     1. Set `API token = <your token>` in plugin settings
-    2. You can define your `HF_HOME` environment variable and create a file containing your token at `$HF_HOME/token`
-    3. Install the [huggingface-cli](https://huggingface.co/docs/huggingface_hub/quick-start) and run `huggingface-cli login` - this will prompt you to enter your token and set it at the right path
+    2. *(not supported yet)* You can define your `HF_HOME` environment variable and create a file containing your token at `$HF_HOME/token`
+    3. *(not supported yet)* Install the [huggingface-cli](https://huggingface.co/docs/huggingface_hub/quick-start) and run `huggingface-cli login` - this will prompt you to enter your token and set it at the right path
 
 3. Choose your model on the [Hugging Face Hub](https://huggingface.co/), and set `Model = <model identifier>` in plugin settings
 
@@ -43,13 +43,79 @@ All of the above still applies, but note:
 
 * When an API token is provided, it will be passed as a header: `Authorization: Bearer <api_token>`.
 
-* Instead of setting a Hugging Face model identifier in `model`, set the URL for your HTTP endpoint.
+* Instead of setting a Hugging Face model identifier in `model`, set the URL for your HTTP endpoint
+
+### Models
+
+**llm-intellij** is assumed to be compatible with any model that generates code.
+
+Here are some configs for popular models in JSON format that you can put in your Settings (`Cmd+,` > `LLM Settings`)
+
+#### [Starcoder](https://huggingface.co/bigcode/starcoder)
+
+```json
+{
+   "tokensToClear": [
+      "<|endoftext|>"
+   ],
+   "fim": {
+      "enabled": true,
+      "prefix": "<fim_prefix>",
+      "middle": "<fim_middle>",
+      "suffix": "<fim_suffix>"
+   },
+   "model": "bigcode/starcoder",
+   "context_window": 8192,
+   "tokenizer": {
+     "repository": "bigcode/starcoder"
+   }
+}
+```
+
+> [!NOTE]
+> These are the default config values
+
+#### [CodeLlama](https://huggingface.co/codellama/CodeLlama-13b-hf)
+
+```json
+{
+   "tokensToClear": [
+      "<EOT>"
+   ],
+   "fim": {
+      "enabled": true,
+      "prefix": "<PRE> ",
+      "middle": " <MID>",
+      "suffix": " <SUF>"
+   },
+   "model": "codellama/CodeLlama-13b-hf",
+   "context_window": 4096,
+   "tokenizer": {
+      "repository": "codellama/CodeLlama-13b-hf"
+   }
+}
+```
+
+> [!NOTE]
+> Spaces are important here
+
 
 ### [**llm-ls**](https://github.com/huggingface/llm-ls)
 
-By default, **llm-ls** is bundled with **llm-intellij**.
+By default, **llm-ls** is installed by **llm-intellij** the first time it is loaded. The binary is downloaded from the [release page](https://github.com/huggingface/llm-ls/releases) and stored in:
+```shell
+"$HOME/.cache/llm_intellij/bin"
+```
 
-When developing locally or if you built your own binary because your platform is not supported, you can set the `LSP binary path` setting.
+When developing locally or if you built your own binary because your platform is not supported, you can set the `llm-ls` > `Binary path` setting to the path of the binary.
+
+`llm-ls` > `Version` is used only when **llm-intellij** downloads **llm-ls** from the release page.
+
+You can also set the log level for **llm-ls** with `llm-ls` > `Log level`, which can take any of the usual `info`, `warn`, `error`, etc as a value.
+The log file is located in:
+```shell
+"$HOME/.cache/llm_ls/llm-ls.log"
+```
 
 ### Tokenizer
 
