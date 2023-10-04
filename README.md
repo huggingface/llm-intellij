@@ -1,10 +1,12 @@
 # LLM powered development for IntelliJ
 
-> [!IMPORTANT]
-> This is currently a work in progress, expect things to be broken!
-
 <!-- Plugin description -->
 **llm-intellij** is a plugin for all things LLM. It uses [**llm-ls**](https://github.com/huggingface/llm-ls) as a backend.
+
+> [!NOTE]
+> When using the Inference API, you will probably encounter some limitations. Subscribe to the *PRO* plan to avoid getting rate limited in the free tier.
+>
+> https://huggingface.co/pricing#pro
 
 ## Features
 
