@@ -9,7 +9,7 @@ import com.intellij.util.xmlb.XmlSerializerUtil
 
 class LspSettings {
     var binaryPath: String? = null
-    var version: String = "0.2.1"
+    var version: String = "0.2.2"
     var logLevel: String = "warn"
 }
 
