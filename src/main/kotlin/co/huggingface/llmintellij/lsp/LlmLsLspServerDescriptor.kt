@@ -101,7 +101,7 @@ fun runCommand(command: String) {
 }
 
 fun downloadLlmLs(logger: Logger, binaryPath: String?, version: String): String? {
-    if (binaryPath != null && File(binaryPath).exists()) {
+    if (binaryPath != null && binaryPath.endsWith(version) && File(binaryPath).exists()) {
         return binaryPath
     }
 
