@@ -30,5 +30,5 @@ class CompletionParams(
 @JsonSegment("llm-ls")
 public interface LlmLsLanguageServer: LanguageServer {
     @JsonRequest
-    fun getCompletions(params: CompletionParams): CompletableFuture<List<Completion>>;
+    fun getCompletions(params: CompletionParams): CompletableFuture<CompletionResponse>;
 }
