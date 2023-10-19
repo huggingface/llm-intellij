@@ -210,7 +210,7 @@ class LlmSettingsComponent {
         llmLsSubsectionPanel.add(lspBinaryPathLabel)
         llmLsSubsectionPanel.add(lspBinaryPath)
         lspVersionLabel = JBLabel("Version")
-        lspVersion = JBTextField("0.3.0")
+        lspVersion = JBTextField("0.4.0")
         llmLsSubsectionPanel.add(lspVersionLabel)
         llmLsSubsectionPanel.add(lspVersion)
         lspLogLevelLabel = JBLabel("Log level")

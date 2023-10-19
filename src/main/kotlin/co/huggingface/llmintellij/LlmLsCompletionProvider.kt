@@ -15,7 +15,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.channelFlow
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 
 class LlmLsCompletionProvider: InlineCompletionProvider {
@@ -40,10 +39,10 @@ class LlmLsCompletionProvider: InlineCompletionProvider {
                     val fimParams = settings.fim
                     val tokenizerConfig = settings.tokenizer
                     val params = CompletionParams(textDocument, position, request_params = queryParams, fim = fimParams, api_token = secrets.getSecretSetting(), model = settings.model, tokens_to_clear = settings.tokensToClear, tokenizer_config = tokenizerConfig, context_window = settings.contextWindow)
-                    lspServer.requestExecutor.sendRequestAsync(LlmLsGetCompletionsRequest(lspServer, params)) { completions ->
+                    lspServer.requestExecutor.sendRequestAsync(LlmLsGetCompletionsRequest(lspServer, params)) { response ->
                         CoroutineScope(Dispatchers.Default).launch {
-                            if (completions != null) {
-                                for (completion in completions) {
+                            if (response != null) {
+                                for (completion in response.completions) {
                                     send(InlineCompletionElement(completion.generated_text))
                                 }
                             }
