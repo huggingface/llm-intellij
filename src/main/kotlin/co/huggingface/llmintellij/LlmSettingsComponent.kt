@@ -58,6 +58,10 @@ class LlmSettingsComponent {
     private val contextWindowLabel: JBLabel
     private val contextWindow: JBTextField
     private val enableGhostText: JBCheckBox
+    private val adaptorLabel: JBLabel
+    private val adaptor: JComboBox<String>
+    private val requestBodyModelLabel: JBLabel
+    private val requestBodyModel: JBTextField
 
     init {
         // Used for all text fields with browse button
@@ -218,6 +222,16 @@ class LlmSettingsComponent {
         llmLsSubsectionPanel.add(lspLogLevelLabel)
         llmLsSubsectionPanel.add(lspLogLevel)
 
+        val adaptorPanel = createSectionPanel("Adaptors", rootPanel)
+        val adaptorOptions = arrayOf("huggingface", "tgi", "ollama", "openai")
+        adaptorLabel = JBLabel("Adaptor provider")
+        adaptor = JComboBox(adaptorOptions)
+        adaptorPanel.add(adaptorLabel)
+        adaptorPanel.add(adaptor)
+        requestBodyModelLabel = JBLabel("Adaptor provider API request model")
+        requestBodyModel = JBTextField("")
+        adaptorPanel.add(requestBodyModelLabel)
+        adaptorPanel.add(requestBodyModel)
     }
 
     val preferredFocusedComponent: JComponent
@@ -413,6 +427,44 @@ class LlmSettingsComponent {
 
     fun setContextWindow(value: UInt) {
         contextWindow.text = value.toString()
+    }
+
+    fun getAdaptor(): String? {
+        var adaptorValue = adaptor.getItemAt(adaptor.selectedIndex)
+        return if ( adaptorValue == "" ) {
+            null
+        } else {
+            adaptorValue
+        }
+    }
+
+    fun setAdaptor(adaptorValue: String) {
+        adaptor.selectedItem = adaptorValue
+    }
+
+    fun getRequestBody(): RequestBody {
+        return RequestBody(model = getRequestBodyModel())
+    }
+
+    fun getRequestBodyModel(): String? {
+        var model = requestBodyModel.text
+        return if (model == "") {
+            null
+        } else {
+            model
+        }
+    }
+
+    fun setRequestBody(requestBody: RequestBody) {
+        var model = requestBody.model
+        when (model) {
+            null -> {
+                requestBodyModel.text = ""
+            }
+            else -> {
+                requestBodyModel.text = model
+            }
+        }
     }
 
     private fun createSectionPanel(title: String, parentPanel: JPanel): JPanel {

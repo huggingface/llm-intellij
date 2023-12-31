@@ -3,6 +3,7 @@ package co.huggingface.llmintellij.lsp
 import co.huggingface.llmintellij.FimParams
 import co.huggingface.llmintellij.QueryParams
 import co.huggingface.llmintellij.TokenizerConfig
+import co.huggingface.llmintellij.RequestBody
 import org.eclipse.lsp4j.TextDocumentIdentifier
 import org.eclipse.lsp4j.jsonrpc.services.JsonRequest
 import org.eclipse.lsp4j.jsonrpc.services.JsonSegment
@@ -25,6 +26,8 @@ class CompletionParams(
     val tokenizer_config: TokenizerConfig?,
     val context_window: UInt,
     val tls_skip_verify_insecure: Boolean = false,
+    val adaptor: String?,
+    val request_body: RequestBody?,
 )
 
 @JsonSegment("llm-ls")
