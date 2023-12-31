@@ -43,6 +43,8 @@ class LlmSettingsConfigurable : Configurable {
         modified = modified or (settingsComponent?.getLspLogLevel() != settings.lsp.logLevel)
         modified = modified or (settingsComponent?.getTokenizerConfig() != settings.tokenizer)
         modified = modified or (settingsComponent?.getContextWindow() != settings.contextWindow)
+        modified = modified or (settingsComponent?.getAdaptor() != settings.adaptor)
+        modified = modified or (settingsComponent?.getRequestBody() != settings.requestBody)
         return modified
     }
 
@@ -65,6 +67,8 @@ class LlmSettingsConfigurable : Configurable {
         settings.lsp.logLevel = settingsComponent?.getLspLogLevel() ?: ""
         settings.tokenizer = settingsComponent?.getTokenizerConfig()
         settings.contextWindow = settingsComponent?.getContextWindow() ?: 0u
+        settings.adaptor = settingsComponent?.getAdaptor()
+        settings.requestBody = settingsComponent?.getRequestBody()
     }
 
     override fun reset() {
@@ -86,6 +90,8 @@ class LlmSettingsConfigurable : Configurable {
         settingsComponent?.setLspLogLevel(settings.lsp.logLevel)
         settingsComponent?.setTokenizerConfig(settings.tokenizer)
         settingsComponent?.setContextWindow(settings.contextWindow)
+        settingsComponent?.setAdaptor(settings.adaptor ?: "")
+        settingsComponent?.setRequestBody(settings.requestBody ?: RequestBody(model = null))
     }
 
     override fun disposeUIResources() {
