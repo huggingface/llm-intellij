@@ -9,6 +9,15 @@ import com.intellij.platform.lsp.api.ProjectWideLspServerDescriptor
 import io.ktor.util.*
 import org.eclipse.lsp4j.services.LanguageServer
 import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.io.IOException
+import java.nio.CharBuffer
+import java.nio.charset.StandardCharsets
+import java.nio.file.Files
+import java.util.zip.GZIPInputStream
+import java.util.zip.ZipInputStream
+import kotlin.io.path.Path
 
 class LlmLsLspServerDescriptor(project: Project) : ProjectWideLspServerDescriptor(project, "LlmLs") {
     private val logger = Logger.getInstance("llmLsLspServerDescriptor")
@@ -56,7 +65,11 @@ fun isUnix(os: String): Boolean {
 
 fun buildBinaryName(logger: Logger): String? {
     val os = System.getProperty("os.name")
-    val arch = System.getProperty("os.arch")
+
+    var arch = System.getProperty("os.arch")
+    if (arch == "amd64") {
+        arch = "x86_64"
+    }
 
     var osSuffix: String? = null
     if (isMac(os)) {
@@ -79,17 +92,29 @@ fun buildUrl(binName: String, version: String): String {
     return "https://github.com/huggingface/llm-ls/releases/download/$version/$binName.gz"
 }
 
-fun downloadAndUnzip(url: String, binDir: File, binName: String, fullPath: String) {
+fun downloadAndUnzip(logger: Logger, url: String, binDir: File, binName: String, fullPath: String) {
     val path = File(binDir, binName).absolutePath
-    val downloadCommand = "curl -L -o $path.gz $url"
-    val unzipCommand = "gunzip $path.gz"
-    val renameCommand = "mv $path $fullPath"
+
+    val downloadCommand = "curl -k -L -o $path.gz $url"
+    runCommand(downloadCommand)
+    logger.info("Download command: $downloadCommand")
+
+    try {
+        val inputByteStream = FileInputStream("$path.gz")
+        val outputByteStream = FileOutputStream(path)
+
+        outputByteStream.write(GZIPInputStream(inputByteStream).use { it.readBytes() })
+        logger.info("Successfully extracted llm-ls")
+    } catch (e: IOException)
+    {
+        logger.error("Gzip exception: $e")
+    }
+
+    Files.move(Path(path), Path(fullPath))
+
+
     val chmodCommand = "chmod +x $fullPath"
     val cleanZipCommand = "rm $path.gz"
-
-    runCommand(downloadCommand)
-    runCommand(unzipCommand)
-    runCommand(renameCommand)
     runCommand(chmodCommand)
     runCommand(cleanZipCommand)
 }
@@ -114,7 +139,7 @@ fun downloadLlmLs(logger: Logger, binaryPath: String?, version: String): String?
 
     if (!fullPath.exists()) {
         val url = buildUrl(binName, version)
-        downloadAndUnzip(url, binDir, binName, fullPath.absolutePath)
+        downloadAndUnzip(logger, url, binDir, binName, fullPath.absolutePath)
         logger.info("Successfully downloaded llm-ls")
     }
 
