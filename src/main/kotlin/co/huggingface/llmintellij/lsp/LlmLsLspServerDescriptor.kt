@@ -7,15 +7,28 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.platform.lsp.api.ProjectWideLspServerDescriptor
 import io.ktor.util.*
+import org.apache.http.HttpHost
+import org.apache.http.client.methods.HttpGet
+import org.apache.http.impl.client.HttpClientBuilder
+import org.apache.http.impl.client.LaxRedirectStrategy
 import org.eclipse.lsp4j.services.LanguageServer
-import java.io.File
-import java.io.FileInputStream
-import java.io.FileOutputStream
-import java.io.IOException
+import java.io.*
+import java.net.ConnectException
+import java.net.URI
+import java.net.URL
+import java.net.http.HttpClient
+import java.net.http.HttpRequest
+import java.net.http.HttpResponse
 import java.nio.file.Files
+import java.security.SecureRandom
+import java.security.cert.X509Certificate
 import java.util.zip.GZIPInputStream
+import javax.net.ssl.SSLContext
+import javax.net.ssl.TrustManager
+import javax.net.ssl.X509TrustManager
 import kotlin.io.path.Path
 import kotlin.io.path.deleteIfExists
+
 
 class LlmLsLspServerDescriptor(project: Project) : ProjectWideLspServerDescriptor(project, "LlmLs") {
     private val logger = Logger.getInstance("llmLsLspServerDescriptor")
@@ -90,13 +103,59 @@ fun buildUrl(binName: String, version: String): String {
     return "https://github.com/huggingface/llm-ls/releases/download/$version/$binName.gz"
 }
 
+private val trustAllCerts = arrayOf<TrustManager>(object : X509TrustManager {
+    override fun getAcceptedIssuers(): Array<X509Certificate>? {
+        return null
+    }
+
+    override fun checkClientTrusted(
+        certs: Array<X509Certificate>, authType: String
+    ) {
+    }
+
+    override fun checkServerTrusted(
+        certs: Array<X509Certificate>, authType: String
+    ) {
+    }
+}
+)
+
 fun downloadAndUnzip(logger: Logger, url: String, binDir: File, binName: String, targetPath: String) {
     val extractedBinPath = File(binDir, binName).absolutePath
     val zipPath = "$extractedBinPath.gz"
 
+    try {
+        //FileOutputStream(zipPath).write(URL(url).readBytes())
+
+        val sslContext: SSLContext = SSLContext.getInstance("TLS")
+        sslContext.init(null, trustAllCerts, SecureRandom())
+        val client = HttpClientBuilder.create()
+            //.setRedirectStrategy(DefaultRedirectStrategy())
+            .setRedirectStrategy(LaxRedirectStrategy())
+            //.setProxy(HttpHost("www-relay.lottery.co.at", 480, "http"))
+            .build()
+        val response = client.execute(HttpGet(url))
+        val reader = BufferedReader(InputStreamReader(response.entity.content))
+        FileOutputStream(zipPath).write(reader.use { it.read() })
+
+
+        /*
+        val client = HttpClient.newHttpClient()
+        val request = HttpRequest.newBuilder().uri(URI.create(url)).build()
+        val response = client.send(request, HttpResponse.BodyHandlers.ofString())
+        FileOutputStream(zipPath).write(response.body().toByteArray())
+         */
+    } catch (e: ConnectException) {
+        logger.error("Error during download: $e")
+    } catch (e: IOException) {
+        logger.error("Error during zip file creation: $e")
+    }
+
+    /*
     val downloadCommand = "curl -k -L -o $zipPath $url"
     runCommand(downloadCommand)
     logger.info("Download command: $downloadCommand")
+     */
 
     try {
         val inputByteStream = FileInputStream(zipPath)
