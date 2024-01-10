@@ -12,12 +12,10 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.IOException
-import java.nio.CharBuffer
-import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.util.zip.GZIPInputStream
-import java.util.zip.ZipInputStream
 import kotlin.io.path.Path
+import kotlin.io.path.deleteIfExists
 
 class LlmLsLspServerDescriptor(project: Project) : ProjectWideLspServerDescriptor(project, "LlmLs") {
     private val logger = Logger.getInstance("llmLsLspServerDescriptor")
@@ -92,16 +90,17 @@ fun buildUrl(binName: String, version: String): String {
     return "https://github.com/huggingface/llm-ls/releases/download/$version/$binName.gz"
 }
 
-fun downloadAndUnzip(logger: Logger, url: String, binDir: File, binName: String, fullPath: String) {
-    val path = File(binDir, binName).absolutePath
+fun downloadAndUnzip(logger: Logger, url: String, binDir: File, binName: String, targetPath: String) {
+    val extractedBinPath = File(binDir, binName).absolutePath
+    val zipPath = "$extractedBinPath.gz"
 
-    val downloadCommand = "curl -k -L -o $path.gz $url"
+    val downloadCommand = "curl -k -L -o $zipPath $url"
     runCommand(downloadCommand)
     logger.info("Download command: $downloadCommand")
 
     try {
-        val inputByteStream = FileInputStream("$path.gz")
-        val outputByteStream = FileOutputStream(path)
+        val inputByteStream = FileInputStream(zipPath)
+        val outputByteStream = FileOutputStream(extractedBinPath)
 
         outputByteStream.write(GZIPInputStream(inputByteStream).use { it.readBytes() })
         logger.info("Successfully extracted llm-ls")
@@ -110,13 +109,19 @@ fun downloadAndUnzip(logger: Logger, url: String, binDir: File, binName: String,
         logger.error("Gzip exception: $e")
     }
 
-    Files.move(Path(path), Path(fullPath))
+    try {
+        Files.move(Path(extractedBinPath), Path(targetPath))
+    } catch (e: IOException) {
+        logger.error("Move failed: $e")
+    }
 
+    try {
+        Path(targetPath).toFile().setExecutable(true, false)
+    } catch (e: IOException) {
+        logger.error("Set file permissions failed: $e")
+    }
 
-    val chmodCommand = "chmod +x $fullPath"
-    val cleanZipCommand = "rm $path.gz"
-    runCommand(chmodCommand)
-    runCommand(cleanZipCommand)
+    Path(zipPath).deleteIfExists()
 }
 
 fun runCommand(command: String) {
