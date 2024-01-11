@@ -118,7 +118,7 @@ private val trustAllCerts = arrayOf<TrustManager>(object : X509TrustManager {
 }
 )
 
-fun downloadFile(urlString: String, outputPath: String) {
+fun downloadFile(logger: Logger, urlString: String, outputPath: String) {
     try {
         val url = URL(urlString)
 
@@ -153,15 +153,15 @@ fun downloadFile(urlString: String, outputPath: String) {
             inputStream.close()
             outputStream.close()
 
-            println("File downloaded successfully.")
+            logger.info("File downloaded successfully.")
         } else {
-            println("Failed to download file. Response Code: ${connection.responseCode}")
+            logger.error("Failed to download file. Response Code: ${connection.responseCode}")
         }
 
         // Disconnect the connection
         connection.disconnect()
     } catch (e: Exception) {
-        println("Error: ${e.message}")
+        logger.error("Error: ${e.message}")
     }
 }
 
@@ -170,13 +170,15 @@ fun downloadAndUnzip(logger: Logger, url: String, binDir: File, binName: String,
     val extractedBinPath = File(binDir, binName).absolutePath
     val zipPath = "$extractedBinPath.gz"
 
-    downloadFile(url, zipPath)
+    downloadFile(logger, url, zipPath)
 
     try {
         val inputByteStream = FileInputStream(zipPath)
         val outputByteStream = FileOutputStream(extractedBinPath)
 
         outputByteStream.write(GZIPInputStream(inputByteStream).use { it.readBytes() })
+        inputByteStream.close()
+        outputByteStream.close()
         logger.info("Successfully extracted llm-ls")
     } catch (e: Exception)
     {
