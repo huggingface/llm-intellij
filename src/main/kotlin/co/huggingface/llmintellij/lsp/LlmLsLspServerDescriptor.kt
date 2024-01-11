@@ -13,9 +13,7 @@ import org.apache.http.impl.client.HttpClientBuilder
 import org.apache.http.impl.client.LaxRedirectStrategy
 import org.eclipse.lsp4j.services.LanguageServer
 import java.io.*
-import java.net.ConnectException
-import java.net.URI
-import java.net.URL
+import java.net.*
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
@@ -120,42 +118,59 @@ private val trustAllCerts = arrayOf<TrustManager>(object : X509TrustManager {
 }
 )
 
+fun downloadFile(urlString: String, outputPath: String) {
+    try {
+        val url = URL(urlString)
+
+        // Open a connection
+        val connection = url.openConnection() as HttpURLConnection
+
+        // Set up connection properties
+        connection.requestMethod = "GET"
+        connection.connectTimeout = 5000 // Adjust timeout as needed
+
+        // Connect to the URL
+        connection.connect()
+
+        // Check if the connection is successful (HTTP 200 OK)
+        if (connection.responseCode == HttpURLConnection.HTTP_OK) {
+            // Open input stream from the connection
+            val inputStream = connection.inputStream
+
+            // Create output stream to write the file
+            val outputStream = FileOutputStream(outputPath)
+
+            // Buffer for reading from input stream
+            val buffer = ByteArray(1024)
+            var bytesRead: Int
+
+            // Read from input stream and write to output stream
+            while (inputStream.read(buffer).also { bytesRead = it } != -1) {
+                outputStream.write(buffer, 0, bytesRead)
+            }
+
+            // Close streams
+            inputStream.close()
+            outputStream.close()
+
+            println("File downloaded successfully.")
+        } else {
+            println("Failed to download file. Response Code: ${connection.responseCode}")
+        }
+
+        // Disconnect the connection
+        connection.disconnect()
+    } catch (e: Exception) {
+        println("Error: ${e.message}")
+    }
+}
+
+
 fun downloadAndUnzip(logger: Logger, url: String, binDir: File, binName: String, targetPath: String) {
     val extractedBinPath = File(binDir, binName).absolutePath
     val zipPath = "$extractedBinPath.gz"
 
-    try {
-        //FileOutputStream(zipPath).write(URL(url).readBytes())
-
-        val sslContext: SSLContext = SSLContext.getInstance("TLS")
-        sslContext.init(null, trustAllCerts, SecureRandom())
-        val client = HttpClientBuilder.create()
-            //.setRedirectStrategy(DefaultRedirectStrategy())
-            .setRedirectStrategy(LaxRedirectStrategy())
-            //.setProxy(HttpHost("www-relay.lottery.co.at", 480, "http"))
-            .build()
-        val response = client.execute(HttpGet(url))
-        val reader = BufferedReader(InputStreamReader(response.entity.content))
-        FileOutputStream(zipPath).write(reader.use { it.read() })
-
-
-        /*
-        val client = HttpClient.newHttpClient()
-        val request = HttpRequest.newBuilder().uri(URI.create(url)).build()
-        val response = client.send(request, HttpResponse.BodyHandlers.ofString())
-        FileOutputStream(zipPath).write(response.body().toByteArray())
-         */
-    } catch (e: ConnectException) {
-        logger.error("Error during download: $e")
-    } catch (e: IOException) {
-        logger.error("Error during zip file creation: $e")
-    }
-
-    /*
-    val downloadCommand = "curl -k -L -o $zipPath $url"
-    runCommand(downloadCommand)
-    logger.info("Download command: $downloadCommand")
-     */
+    downloadFile(url, zipPath)
 
     try {
         val inputByteStream = FileInputStream(zipPath)
@@ -163,20 +178,20 @@ fun downloadAndUnzip(logger: Logger, url: String, binDir: File, binName: String,
 
         outputByteStream.write(GZIPInputStream(inputByteStream).use { it.readBytes() })
         logger.info("Successfully extracted llm-ls")
-    } catch (e: IOException)
+    } catch (e: Exception)
     {
         logger.error("Gzip exception: $e")
     }
 
     try {
         Files.move(Path(extractedBinPath), Path(targetPath))
-    } catch (e: IOException) {
+    } catch (e: Exception) {
         logger.error("Move failed: $e")
     }
 
     try {
         Path(targetPath).toFile().setExecutable(true, false)
-    } catch (e: IOException) {
+    } catch (e: Exception) {
         logger.error("Set file permissions failed: $e")
     }
 
