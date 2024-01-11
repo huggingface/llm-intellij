@@ -7,21 +7,12 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.platform.lsp.api.ProjectWideLspServerDescriptor
 import io.ktor.util.*
-import org.apache.http.HttpHost
-import org.apache.http.client.methods.HttpGet
-import org.apache.http.impl.client.HttpClientBuilder
-import org.apache.http.impl.client.LaxRedirectStrategy
 import org.eclipse.lsp4j.services.LanguageServer
 import java.io.*
 import java.net.*
-import java.net.http.HttpClient
-import java.net.http.HttpRequest
-import java.net.http.HttpResponse
 import java.nio.file.Files
-import java.security.SecureRandom
 import java.security.cert.X509Certificate
 import java.util.zip.GZIPInputStream
-import javax.net.ssl.SSLContext
 import javax.net.ssl.TrustManager
 import javax.net.ssl.X509TrustManager
 import kotlin.io.path.Path
@@ -100,23 +91,6 @@ fun buildBinaryName(logger: Logger): String? {
 fun buildUrl(binName: String, version: String): String {
     return "https://github.com/huggingface/llm-ls/releases/download/$version/$binName.gz"
 }
-
-private val trustAllCerts = arrayOf<TrustManager>(object : X509TrustManager {
-    override fun getAcceptedIssuers(): Array<X509Certificate>? {
-        return null
-    }
-
-    override fun checkClientTrusted(
-        certs: Array<X509Certificate>, authType: String
-    ) {
-    }
-
-    override fun checkServerTrusted(
-        certs: Array<X509Certificate>, authType: String
-    ) {
-    }
-}
-)
 
 fun downloadFile(logger: Logger, urlString: String, outputPath: String) {
     try {
