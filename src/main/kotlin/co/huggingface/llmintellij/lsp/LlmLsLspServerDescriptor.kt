@@ -11,10 +11,7 @@ import org.eclipse.lsp4j.services.LanguageServer
 import java.io.*
 import java.net.*
 import java.nio.file.Files
-import java.security.cert.X509Certificate
 import java.util.zip.GZIPInputStream
-import javax.net.ssl.TrustManager
-import javax.net.ssl.X509TrustManager
 import kotlin.io.path.Path
 import kotlin.io.path.deleteIfExists
 
@@ -172,12 +169,6 @@ fun downloadAndUnzip(logger: Logger, url: String, binDir: File, binName: String,
     }
 
     Path(zipPath).deleteIfExists()
-}
-
-fun runCommand(command: String) {
-    val process = Runtime.getRuntime().exec(command)
-
-    process.waitFor()
 }
 
 fun downloadLlmLs(logger: Logger, binaryPath: String?, version: String): String? {
