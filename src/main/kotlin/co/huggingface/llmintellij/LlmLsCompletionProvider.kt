@@ -38,7 +38,7 @@ class LlmLsCompletionProvider: InlineCompletionProvider {
                     val queryParams = settings.queryParams
                     val fimParams = settings.fim
                     val tokenizerConfig = settings.tokenizer
-                    val params = CompletionParams(textDocument, position, request_params = queryParams, fim = fimParams, api_token = secrets.getSecretSetting(), model = settings.model, tokens_to_clear = settings.tokensToClear, tokenizer_config = tokenizerConfig, context_window = settings.contextWindow)
+                    val params = CompletionParams(textDocument, position, request_params = queryParams, fim = fimParams, api_token = secrets.getSecretSetting(), model = settings.model, tokens_to_clear = settings.tokensToClear, tokenizer_config = tokenizerConfig, context_window = settings.contextWindow, tls_skip_verify_insecure = settings.tlsSkipVerifyInsecure)
                     lspServer.requestExecutor.sendRequestAsync(LlmLsGetCompletionsRequest(lspServer, params)) { response ->
                         CoroutineScope(Dispatchers.Default).launch {
                             if (response != null) {
