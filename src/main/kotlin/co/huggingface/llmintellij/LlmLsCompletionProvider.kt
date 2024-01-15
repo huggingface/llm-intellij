@@ -57,4 +57,9 @@ class LlmLsCompletionProvider: InlineCompletionProvider {
         val settings = LlmSettingsState.instance
         return settings.ghostTextEnabled
     }
+    
+    override fun isEnabled(event: DocumentEvent): Boolean {
+        val settings = LlmSettingsState.instance
+        return settings.ghostTextEnabled
+    }
 }
