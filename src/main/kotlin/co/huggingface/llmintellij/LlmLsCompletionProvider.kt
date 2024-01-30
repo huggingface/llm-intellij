@@ -4,24 +4,27 @@ import co.huggingface.llmintellij.lsp.CompletionParams
 import co.huggingface.llmintellij.lsp.LlmLsGetCompletionsRequest
 import co.huggingface.llmintellij.lsp.LlmLsServerSupportProvider
 import co.huggingface.llmintellij.lsp.Position
-import com.intellij.codeInsight.inline.completion.InlineCompletionElement
 import com.intellij.codeInsight.inline.completion.InlineCompletionEvent
 import com.intellij.codeInsight.inline.completion.InlineCompletionProvider
+import com.intellij.codeInsight.inline.completion.InlineCompletionProviderID
 import com.intellij.codeInsight.inline.completion.InlineCompletionRequest
+import com.intellij.codeInsight.inline.completion.InlineCompletionSuggestion
+import com.intellij.codeInsight.inline.completion.elements.InlineCompletionGrayTextElement
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.platform.lsp.api.LspServerManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.launch
 
-class LlmLsCompletionProvider: InlineCompletionProvider {
+class LlmLsCompletionProvider : InlineCompletionProvider {
     private val logger = Logger.getInstance("inlineCompletion")
 
-    override suspend fun getProposals(request: InlineCompletionRequest): Flow<InlineCompletionElement> =
-        channelFlow {
+    override val id: InlineCompletionProviderID = InlineCompletionProviderID("LlmLsCompletionProvider")
+
+    override suspend fun getSuggestion(request: InlineCompletionRequest): InlineCompletionSuggestion {
+        return InlineCompletionSuggestion.Default(suggestionFlow = channelFlow {
             val project = request.editor.project
             if (project == null) {
                 logger.error("could not find project")
@@ -43,7 +46,7 @@ class LlmLsCompletionProvider: InlineCompletionProvider {
                         CoroutineScope(Dispatchers.Default).launch {
                             if (response != null) {
                                 for (completion in response.completions) {
-                                    send(InlineCompletionElement(completion.generated_text))
+                                    send(InlineCompletionGrayTextElement(completion.generated_text))
                                 }
                             }
                         }
@@ -51,7 +54,8 @@ class LlmLsCompletionProvider: InlineCompletionProvider {
                 }
             }
             awaitClose()
-        }
+        })
+    }
 
     override fun isEnabled(event: InlineCompletionEvent): Boolean {
         val settings = LlmSettingsState.instance
