@@ -21,7 +21,7 @@ import kotlin.time.DurationUnit
 import kotlin.time.toDuration
 
 class LlmLsCompletionProvider : DebouncedInlineCompletionProvider() {
-    override val delay: Duration = 500.toDuration(DurationUnit.MILLISECONDS)
+    override var delay: Duration = 500.toDuration(DurationUnit.MILLISECONDS)
     private val logger = Logger.getInstance("inlineCompletion")
     override fun force(request: InlineCompletionRequest): Boolean {
         return false
@@ -34,6 +34,7 @@ class LlmLsCompletionProvider : DebouncedInlineCompletionProvider() {
                 logger.error("could not find project")
             } else {
                 val settings = LlmSettingsState.instance
+                delay = settings.debounceDelay
                 val secrets = SecretsService.instance
                 val lspServer = LspServerManager.getInstance(project).getServersForProvider(LlmLsServerSupportProvider::class.java).firstOrNull()
                 if (lspServer != null) {

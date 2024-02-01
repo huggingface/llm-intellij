@@ -5,6 +5,8 @@ import com.intellij.openapi.components.PersistentStateComponent
 import com.intellij.openapi.components.State
 import com.intellij.openapi.components.Storage
 import com.intellij.util.xmlb.XmlSerializerUtil
+import kotlin.time.DurationUnit
+import kotlin.time.toDuration
 
 
 class LspSettings {
@@ -45,6 +47,7 @@ class LlmSettingsState: PersistentStateComponent<LlmSettingsState?> {
     var queryParams = QueryParams()
     var fim = FimParams()
     var tlsSkipVerifyInsecure = false
+    var debounceDelay = 500.toDuration(DurationUnit.MILLISECONDS)
     var lsp = LspSettings()
     var tokenizer: TokenizerConfig? = TokenizerConfig.HuggingFace("bigcode/starcoder")
     var contextWindow = 8192u
