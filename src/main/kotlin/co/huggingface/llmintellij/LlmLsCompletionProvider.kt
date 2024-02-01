@@ -6,7 +6,7 @@ import co.huggingface.llmintellij.lsp.LlmLsServerSupportProvider
 import co.huggingface.llmintellij.lsp.Position
 import com.intellij.codeInsight.inline.completion.InlineCompletionElement
 import com.intellij.codeInsight.inline.completion.InlineCompletionEvent
-import com.intellij.codeInsight.inline.completion.InlineCompletionProvider
+import com.intellij.codeInsight.inline.completion.DebouncedInlineCompletionProvider
 import com.intellij.codeInsight.inline.completion.InlineCompletionRequest
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.platform.lsp.api.LspServerManager
@@ -16,17 +16,25 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.launch
+import kotlin.time.Duration
+import kotlin.time.DurationUnit
+import kotlin.time.toDuration
 
-class LlmLsCompletionProvider: InlineCompletionProvider {
+class LlmLsCompletionProvider : DebouncedInlineCompletionProvider() {
+    override var delay: Duration = 500.toDuration(DurationUnit.MILLISECONDS)
     private val logger = Logger.getInstance("inlineCompletion")
+    override fun force(request: InlineCompletionRequest): Boolean {
+        return false
+    }
 
-    override suspend fun getProposals(request: InlineCompletionRequest): Flow<InlineCompletionElement> =
+    override suspend fun getProposalsDebounced(request: InlineCompletionRequest): Flow<InlineCompletionElement> =
         channelFlow {
             val project = request.editor.project
             if (project == null) {
                 logger.error("could not find project")
             } else {
                 val settings = LlmSettingsState.instance
+                delay = settings.debounceDelay
                 val secrets = SecretsService.instance
                 val lspServer = LspServerManager.getInstance(project).getServersForProvider(LlmLsServerSupportProvider::class.java).firstOrNull()
                 if (lspServer != null) {

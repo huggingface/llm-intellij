@@ -3,6 +3,8 @@ package co.huggingface.llmintellij
 import com.intellij.openapi.options.Configurable
 import org.jetbrains.annotations.Nls
 import javax.swing.JComponent
+import kotlin.time.DurationUnit
+import kotlin.time.toDuration
 
 
 class LlmSettingsConfigurable : Configurable {
@@ -38,6 +40,7 @@ class LlmSettingsConfigurable : Configurable {
         modified = modified or (settingsComponent?.getFimMiddle() != settings.fim.middle)
         modified = modified or (settingsComponent?.getFimSuffix() != settings.fim.suffix)
         modified = modified or (settingsComponent?.isTlsSkipVerifyInsecureEnabled() != settings.tlsSkipVerifyInsecure)
+        modified = modified or (settingsComponent?.getDebounceDelay() != settings.debounceDelay)
         modified = modified or (settingsComponent?.getLspBinaryPath() != settings.lsp.binaryPath)
         modified = modified or (settingsComponent?.getLspVersion() != settings.lsp.version)
         modified = modified or (settingsComponent?.getLspLogLevel() != settings.lsp.logLevel)
@@ -60,6 +63,7 @@ class LlmSettingsConfigurable : Configurable {
         settings.fim.middle = settingsComponent?.getFimMiddle() ?: ""
         settings.fim.suffix = settingsComponent?.getFimSuffix() ?: ""
         settings.tlsSkipVerifyInsecure = settingsComponent?.isTlsSkipVerifyInsecureEnabled() ?: false
+        settings.debounceDelay = settingsComponent?.getDebounceDelay() ?: 500.toDuration(DurationUnit.MILLISECONDS)
         settings.lsp.binaryPath = settingsComponent?.getLspBinaryPath()
         settings.lsp.version = settingsComponent?.getLspVersion() ?: ""
         settings.lsp.logLevel = settingsComponent?.getLspLogLevel() ?: ""
@@ -81,6 +85,7 @@ class LlmSettingsConfigurable : Configurable {
         settingsComponent?.setFimMiddle(settings.fim.middle)
         settingsComponent?.setFimSuffix(settings.fim.suffix)
         settingsComponent?.setTlsSkipVerifyInsecureStatus(settings.tlsSkipVerifyInsecure)
+        settingsComponent?.setDebounceDelay(settings.debounceDelay)
         settingsComponent?.setLspBinaryPath(settings.lsp.binaryPath ?: "")
         settingsComponent?.setLspVersion(settings.lsp.version)
         settingsComponent?.setLspLogLevel(settings.lsp.logLevel)
