@@ -34,22 +34,22 @@ jobs:
 
       # Check out current repository
       - name: Fetch Sources
-        uses: actions/checkout@v3
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
 
       # Validate wrapper
       - name: Gradle Wrapper Validation
-        uses: gradle/wrapper-validation-action@v1.1.0
+        uses: gradle/wrapper-validation-action@56b90f209b02bf6d1deae490e9ef18b21a389cd4  # v1.1.0
 
       # Set up Java environment for the next steps
       - name: Setup Java
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@17f84c3641ba7b8f6deff6309fc4c864478f5d62  # v3
         with:
           distribution: zulu
           java-version: 17
 
       # Setup Gradle
       - name: Setup Gradle
-        uses: gradle/gradle-build-action@v2
+        uses: gradle/gradle-build-action@a8f75513eafdebd8141bd1cd4e30fcd194af8dfa  # v2
         with:
           gradle-home-cache-cleanup: true
 
@@ -82,7 +82,7 @@ jobs:
 
       # Store already-built plugin as an artifact for downloading
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@ff15f0306b3f739f7b6fd43fb5d26cd321bd4de5  # v3
         with:
           name: ${{ steps.artifact.outputs.filename }}
           path: ./build/distributions/content/*/*
@@ -96,18 +96,18 @@ jobs:
 
       # Check out current repository
       - name: Fetch Sources
-        uses: actions/checkout@v3
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
 
       # Set up Java environment for the next steps
       - name: Setup Java
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@17f84c3641ba7b8f6deff6309fc4c864478f5d62  # v3
         with:
           distribution: zulu
           java-version: 17
 
       # Setup Gradle
       - name: Setup Gradle
-        uses: gradle/gradle-build-action@v2
+        uses: gradle/gradle-build-action@a8f75513eafdebd8141bd1cd4e30fcd194af8dfa  # v2
         with:
           gradle-home-cache-cleanup: true
 
@@ -118,7 +118,7 @@ jobs:
       # Collect Tests Result of failed tests
       - name: Collect Tests Result
         if: ${{ failure() }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@ff15f0306b3f739f7b6fd43fb5d26cd321bd4de5  # v3
         with:
           name: tests-result
           path: ${{ github.workspace }}/build/reports/tests
@@ -136,25 +136,25 @@ jobs:
 
       # Free GitHub Actions Environment Disk Space
       - name: Maximize Build Space
-        uses: jlumbroso/free-disk-space@main
+        uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be  # main
         with:
           tool-cache: false
           large-packages: false
 
       # Check out current repository
       - name: Fetch Sources
-        uses: actions/checkout@v3
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
 
       # Set up Java environment for the next steps
       - name: Setup Java
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@17f84c3641ba7b8f6deff6309fc4c864478f5d62  # v3
         with:
           distribution: zulu
           java-version: 17
 
       # Run Qodana inspections
       - name: Qodana - Code Inspection
-        uses: JetBrains/qodana-action@v2023.2.1
+        uses: JetBrains/qodana-action@77f0ff0c702065648df9fd0340a48919dca5a1ff  # v2023.2.1
         with:
           cache-default-branch-only: true
 
@@ -171,11 +171,11 @@ jobs:
 
       # Check out current repository
       - name: Fetch Sources
-        uses: actions/checkout@v3
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
 
       # Set up Java environment for the next steps
       - name: Setup Java
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@17f84c3641ba7b8f6deff6309fc4c864478f5d62  # v3
         with:
           distribution: zulu
           java-version: 17
