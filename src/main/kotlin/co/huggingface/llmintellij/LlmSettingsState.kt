@@ -34,6 +34,10 @@ sealed class TokenizerConfig {
     data class Download(val url: String, val to: String) : TokenizerConfig()
 }
 
+class RequestBody(
+    var model: String? = null,
+)
+
 @State(
     name = "co.huggingface.llmintellij.LlmSettingsState",
     storages = [Storage("LlmSettingsPlugin.xml")]
@@ -48,6 +52,8 @@ class LlmSettingsState: PersistentStateComponent<LlmSettingsState?> {
     var lsp = LspSettings()
     var tokenizer: TokenizerConfig? = TokenizerConfig.HuggingFace("bigcode/starcoder")
     var contextWindow = 8192u
+    var adaptor: String? = "huggingface"
+    var requestBody: RequestBody? = null
 
     override fun getState(): LlmSettingsState {
         return this
