@@ -16,6 +16,9 @@ import javax.swing.JComponent
 import javax.swing.JPanel
 import javax.swing.event.DocumentEvent
 import javax.swing.event.DocumentListener
+import kotlin.time.Duration
+import kotlin.time.DurationUnit
+import kotlin.time.toDuration
 
 class LlmSettingsComponent {
     val rootPanel: JPanel = JPanel()
@@ -41,6 +44,8 @@ class LlmSettingsComponent {
     private val fimSuffixLabel: JBLabel
     private val fimSuffix: JBTextField
     private val tlsSkipVerifyInsecure: JBCheckBox
+    private val debounceDelayLabel: JBLabel
+    private val debounceDelay: JBTextField
     private val lspBinaryPath: TextFieldWithBrowseButton
     private val lspVersionLabel: JBLabel
     private val lspVersion: JBTextField
@@ -218,6 +223,11 @@ class LlmSettingsComponent {
         llmLsSubsectionPanel.add(lspLogLevelLabel)
         llmLsSubsectionPanel.add(lspLogLevel)
 
+        val pluginSettingsPanel = createSectionPanel("Plugin settings", rootPanel)
+        debounceDelayLabel = JBLabel("Debounce delay in milliseconds")
+        debounceDelay = JBTextField("500")
+        pluginSettingsPanel.add(debounceDelayLabel)
+        pluginSettingsPanel.add(debounceDelay)
     }
 
     val preferredFocusedComponent: JComponent
@@ -351,6 +361,14 @@ class LlmSettingsComponent {
 
     fun setLspLogLevel(value: String) {
         lspLogLevel.text = value
+    }
+
+    fun getDebounceDelay(): Duration {
+        return debounceDelay.text.toInt().toDuration(DurationUnit.MILLISECONDS)
+    }
+
+    fun setDebounceDelay(value: Duration) {
+        debounceDelay.text = value.inWholeMilliseconds.toString()
     }
 
     fun getLspBinaryPath(): String? {
