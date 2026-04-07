@@ -1,17 +1,28 @@
 package co.huggingface.llmintellij.lsp
 
 import co.huggingface.llmintellij.LlmSettingsState
+import com.intellij.execution.ExecutionException
 import com.intellij.execution.configurations.GeneralCommandLine
+import com.intellij.execution.process.OSProcessHandler
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.platform.lsp.api.ProjectWideLspServerDescriptor
+import com.intellij.util.concurrency.annotations.RequiresBackgroundThread
 import io.ktor.util.*
 import org.eclipse.lsp4j.services.LanguageServer
 import java.io.File
 
 class LlmLsLspServerDescriptor(project: Project) : ProjectWideLspServerDescriptor(project, "LlmLs") {
     private val logger = Logger.getInstance("llmLsLspServerDescriptor")
+
+    @RequiresBackgroundThread
+    @Throws(ExecutionException::class)
+    override fun startServerProcess(): OSProcessHandler {
+        val startingCommandLine = createCommandLine()
+        LOG.info("$this: starting LSP server: $startingCommandLine")
+        return LLMOsProcessHandler(startingCommandLine)
+    }
 
     override fun isSupportedFile(file: VirtualFile) = true
 
