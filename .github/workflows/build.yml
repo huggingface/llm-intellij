@@ -20,10 +20,14 @@ on:
   # Trigger the workflow on any pull request
   pull_request:
 
+permissions: {}
+
 jobs:
 
   # Prepare environment and build the plugin
   build:
+    permissions:
+      contents: read
     name: Build
     runs-on: ubuntu-latest
     outputs:
@@ -89,6 +93,8 @@ jobs:
 
   # Run tests and upload a code coverage report
   test:
+    permissions:
+      contents: read
     name: Test
     needs: [ build ]
     runs-on: ubuntu-latest
@@ -136,7 +142,7 @@ jobs:
 
       # Free GitHub Actions Environment Disk Space
       - name: Maximize Build Space
-        uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be  # main
+        uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be # v1.3.1
         with:
           tool-cache: false
           large-packages: false
