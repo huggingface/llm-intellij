@@ -77,6 +77,27 @@ Here are some configs for popular models in JSON format that you can put in your
 > [!NOTE]
 > These are the default config values
 
+#### [CodeGemma](https://huggingface.co/google/codegemma-2b)
+
+```json
+{
+   "tokensToClear": [
+      "<|file_separator|>"
+   ],
+   "fim": {
+      "enabled": true,
+      "prefix": "<|fim_prefix|>",
+      "middle": "<|fim_middle|>",
+      "suffix": "<|fim_suffix|>"
+   },
+   "model": "google/codegemma-2b",
+   "context_window": 8192,
+   "tokenizer": {
+      "repository": "google/codegemma-2b"
+   }
+}
+```
+
 #### [CodeLlama](https://huggingface.co/codellama/CodeLlama-13b-hf)
 
 ```json
