@@ -20,10 +20,14 @@ on:
   # Trigger the workflow on any pull request
   pull_request:
 
+permissions: {}
+
 jobs:
 
   # Prepare environment and build the plugin
   build:
+    permissions:
+      contents: read
     name: Build
     runs-on: ubuntu-latest
     outputs:
@@ -89,6 +93,8 @@ jobs:
 
   # Run tests and upload a code coverage report
   test:
+    permissions:
+      contents: read
     name: Test
     needs: [ build ]
     runs-on: ubuntu-latest
